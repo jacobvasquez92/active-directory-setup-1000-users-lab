@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Active Directory Home Lab — VMware | Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:        #0a0c10;
+    --bg2:       #0f1218;
+    --bg3:       #141820;
+    --surface:   #1a1f2e;
+    --surface2:  #222840;
+    --border:    #2a3050;
+    --accent:    #00d4ff;
+    --accent2:   #0099cc;
+    --green:     #00ff88;
+    --orange:    #ff8c42;
+    --red:       #ff4d6d;
+    --purple:    #a78bfa;
+    --text:      #e2e8f0;
+    --text2:     #94a3b8;
+    --text3:     #64748b;
+    --mono:      'JetBrains Mono', monospace;
+    --sans:      'Syne', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    min-height: 380px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px 40px 60px;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 70% 60% at 60% 40%, rgba(0,212,255,0.07) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 50% at 10% 80%, rgba(0,255,136,0.04) 0%, transparent 60%);
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    mask-image: linear-gradient(to bottom, transparent, black 30%, black 70%, transparent);
+  }
+
+  .hero-badge {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: rgba(0,212,255,0.08);
+    border: 1px solid rgba(0,212,255,0.25);
+    padding: 4px 12px;
+    border-radius: 3px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    width: fit-content;
+    position: relative;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .hero-badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse 2s ease infinite;
+  }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .hero h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    position: relative;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  .hero h1 span { color: var(--accent); }
+
+  .hero-sub {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text2);
+    margin-top: 16px;
+    position: relative;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+
+  .hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 32px;
+    position: relative;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+
+  .hero-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 5px 12px;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    color: var(--text2);
+    background: var(--surface);
+  }
+
+  .hero-tag.green { color: var(--green); border-color: rgba(0,255,136,0.3); background: rgba(0,255,136,0.05); }
+  .hero-tag.orange { color: var(--orange); border-color: rgba(255,140,66,0.3); background: rgba(255,140,66,0.05); }
+  .hero-tag.purple { color: var(--purple); border-color: rgba(167,139,250,0.3); background: rgba(167,139,250,0.05); }
+
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(16px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  /* ── LAYOUT ── */
+  .wrapper {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 0;
+    max-width: 1280px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 32px 24px;
+    border-right: 1px solid var(--border);
+    scrollbar-width: none;
+  }
+  .sidebar::-webkit-scrollbar { display: none; }
+
+  .sidebar-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 16px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 5px;
+    margin-bottom: 2px;
+    text-decoration: none;
+    color: var(--text2);
+    font-size: 13px;
+    font-family: var(--mono);
+    transition: all 0.15s ease;
+    border: 1px solid transparent;
+  }
+  .nav-item:hover {
+    background: var(--surface);
+    color: var(--accent);
+    border-color: var(--border);
+  }
+  .nav-item.active {
+    background: rgba(0,212,255,0.08);
+    color: var(--accent);
+    border-color: rgba(0,212,255,0.2);
+  }
+  .nav-num {
+    font-size: 10px;
+    color: var(--text3);
+    min-width: 18px;
+    padding-top: 2px;
+  }
+
+  .progress-bar {
+    height: 2px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 20px 0;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--green));
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+
+  /* ── MAIN CONTENT ── */
+  .main {
+    padding: 48px 48px 80px;
+    min-width: 0;
+  }
+
+  /* ── SECTIONS ── */
+  .section {
+    margin-bottom: 72px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .section.visible { opacity: 1; transform: translateY(0); }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(0,212,255,0.1);
+    border: 1px solid rgba(0,212,255,0.25);
+    padding: 3px 8px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  .section-header h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  /* ── ARCHITECTURE BOX ── */
+  .arch-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 28px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--green);
+    line-height: 1.8;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .arch-box::before {
+    content: 'NETWORK ARCHITECTURE';
+    position: absolute;
+    top: 12px; right: 16px;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--text3);
+  }
+
+  .arch-internet { color: var(--accent); }
+  .arch-dc { color: var(--green); }
+  .arch-client { color: var(--orange); }
+  .arch-label { color: var(--text3); }
+
+  /* ── WHAT YOU'LL BUILD ── */
+  .build-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .build-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .build-icon { font-size: 20px; flex-shrink: 0; }
+  .build-card p { font-size: 13px; color: var(--text2); line-height: 1.5; }
+
+  /* ── REQUIREMENTS TABLE ── */
+  .req-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .req-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+  }
+  .req-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 8px;
+  }
+  .req-min { font-size: 13px; color: var(--text2); }
+  .req-rec { font-size: 13px; color: var(--green); font-weight: 600; }
+
+  /* ── DOWNLOAD TABLE ── */
+  .dl-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+  .dl-table th {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text3);
+    padding: 10px 16px;
+    text-align: left;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+  }
+  .dl-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text2);
+  }
+  .dl-table tr:hover td { background: var(--surface); }
+  .dl-table a {
+    color: var(--accent);
+    text-decoration: none;
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+  .dl-table a:hover { text-decoration: underline; }
+
+  /* ── STEPS ── */
+  .steps { list-style: none; padding: 0; }
+  .step {
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    gap: 16px;
+    margin-bottom: 14px;
+    align-items: start;
+  }
+  .step-num {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+  .step-body { padding-top: 6px; font-size: 14px; color: var(--text2); }
+  .step-body strong { color: var(--text); }
+
+  /* ── SETTINGS TABLE ── */
+  .settings-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 16px 0;
+  }
+  .settings-table th {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text3);
+    padding: 10px 16px;
+    text-align: left;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .settings-table td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text2);
+  }
+  .settings-table tr:last-child td { border-bottom: none; }
+  .settings-table td:first-child {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text);
+    font-weight: 600;
+  }
+  .val-accent { color: var(--accent); font-family: var(--mono); font-size: 12px; }
+  .val-green  { color: var(--green);  font-family: var(--mono); font-size: 12px; }
+  .val-orange { color: var(--orange); font-family: var(--mono); font-size: 12px; }
+  .val-note   { color: var(--text3);  font-size: 12px; }
+
+  /* ── CODE BLOCKS ── */
+  .code-block {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 16px 0;
+    position: relative;
+  }
+  .code-header {
+    background: var(--surface);
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+  .code-lang {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .copy-btn {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+    background: none;
+    border: 1px solid var(--border);
+    padding: 3px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .copy-btn.copied { color: var(--green); border-color: var(--green); }
+  pre {
+    padding: 20px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--green);
+    line-height: 1.7;
+    overflow-x: auto;
+  }
+  pre .comment { color: var(--text3); }
+  pre .cmd     { color: var(--accent); }
+  pre .kw      { color: var(--purple); }
+  pre .str     { color: var(--orange); }
+  pre .val     { color: var(--green); }
+
+  /* ── INLINE CODE ── */
+  code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--surface);
+    color: var(--accent);
+    padding: 2px 7px;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+  }
+
+  /* ── CALLOUTS ── */
+  .callout {
+    display: flex;
+    gap: 14px;
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin: 16px 0;
+    font-size: 13px;
+    line-height: 1.6;
+    align-items: flex-start;
+  }
+  .callout-icon { font-size: 18px; flex-shrink: 0; }
+  .callout.tip  { background: rgba(0,212,255,0.06); border: 1px solid rgba(0,212,255,0.2); }
+  .callout.warn { background: rgba(255,140,66,0.06); border: 1px solid rgba(255,140,66,0.2); }
+  .callout.warn .callout-icon { color: var(--orange); }
+  .callout.success { background: rgba(0,255,136,0.06); border: 1px solid rgba(0,255,136,0.2); }
+  .callout.success .callout-icon { color: var(--green); }
+  .callout-body { color: var(--text2); }
+  .callout-body strong { color: var(--text); }
+
+  /* ── SUBSECTION HEADERS ── */
+  h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 28px 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  h3::before {
+    content: '';
+    display: inline-block;
+    width: 3px; height: 18px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  p { color: var(--text2); font-size: 14px; margin-bottom: 12px; line-height: 1.75; }
+  p strong { color: var(--text); }
+
+  /* ── SUMMARY TABLE ── */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .summary-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .summary-key {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text3);
+  }
+  .summary-val {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--accent);
+  }
+
+  /* ── TROUBLESHOOTING ── */
+  .trouble-item {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .trouble-q {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    cursor: pointer;
+    transition: background 0.15s;
+    font-size: 13px;
+    color: var(--text);
+    font-weight: 600;
+  }
+  .trouble-q:hover { background: var(--surface); }
+  .trouble-q::before {
+    content: '▶';
+    font-size: 10px;
+    color: var(--accent);
+    transition: transform 0.2s;
+  }
+  .trouble-item.open .trouble-q::before { transform: rotate(90deg); }
+  .trouble-a {
+    display: none;
+    padding: 0 18px 16px 44px;
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.7;
+  }
+  .trouble-item.open .trouble-a { display: block; }
+
+  /* ── REFERENCES ── */
+  .ref-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+  }
+  .ref-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    text-decoration: none;
+    transition: all 0.15s;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .ref-card:hover {
+    border-color: var(--accent);
+    background: rgba(0,212,255,0.05);
+    transform: translateY(-2px);
+  }
+  .ref-icon { font-size: 20px; }
+  .ref-title { font-size: 13px; font-weight: 600; color: var(--text); }
+  .ref-url { font-family: var(--mono); font-size: 10px; color: var(--text3); }
+
+  /* ── FOOTER ── */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .footer a { color: var(--accent); text-decoration: none; }
+
+  /* ── DIVIDER ── */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 32px 0;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .wrapper { grid-template-columns: 1fr; }
+    .sidebar { position: static; height: auto; border-right: none; border-bottom: 1px solid var(--border); }
+    .main { padding: 32px 24px; }
+    .hero { padding: 60px 24px 40px; }
+    .req-grid { grid-template-columns: 1fr 1fr; }
+    .summary-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    .req-grid { grid-template-columns: 1fr; }
+    .build-list { grid-template-columns: 1fr; }
+    .footer { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ HERO ══ -->
+<header class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-badge">Cybersecurity Home Lab</div>
+  <h1>Active Directory<br><span>Home Lab</span></h1>
+  <p class="hero-sub">// VMware Workstation &nbsp;·&nbsp; Windows Server 2022 &nbsp;·&nbsp; PowerShell &nbsp;·&nbsp; AD DS / DNS / DHCP / NAT</p>
+  <div class="hero-meta">
+    <span class="hero-tag green">● VMware</span>
+    <span class="hero-tag orange">● Windows Server 2022</span>
+    <span class="hero-tag purple">● Active Directory</span>
+    <span class="hero-tag">Based on Josh Madakor</span>
+  </div>
+</header>
+
+<!-- ══ BODY ══ -->
+<div class="wrapper">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-title">// Contents</div>
+    <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+    <a class="nav-item" href="#s1"><span class="nav-num">01</span>Overview &amp; Architecture</a>
+    <a class="nav-item" href="#s2"><span class="nav-num">02</span>Prerequisites &amp; Downloads</a>
+    <a class="nav-item" href="#s3"><span class="nav-num">03</span>VM 1 — Domain Controller</a>
+    <a class="nav-item" href="#s4"><span class="nav-num">04</span>Configure Network Adapters</a>
+    <a class="nav-item" href="#s5"><span class="nav-num">05</span>Install AD DS</a>
+    <a class="nav-item" href="#s6"><span class="nav-num">06</span>Domain Admin Account</a>
+    <a class="nav-item" href="#s7"><span class="nav-num">07</span>Install RAS / NAT</a>
+    <a class="nav-item" href="#s8"><span class="nav-num">08</span>Configure DHCP</a>
+    <a class="nav-item" href="#s9"><span class="nav-num">09</span>PowerShell Bulk Users</a>
+    <a class="nav-item" href="#s10"><span class="nav-num">10</span>VM 2 — Client Setup</a>
+    <a class="nav-item" href="#s11"><span class="nav-num">11</span>Join Client to Domain</a>
+    <a class="nav-item" href="#s12"><span class="nav-num">12</span>Post-Lab Admin Tasks</a>
+    <a class="nav-item" href="#summary"><span class="nav-num">—</span>Lab Summary</a>
+    <a class="nav-item" href="#troubleshooting"><span class="nav-num">—</span>Troubleshooting</a>
+    <a class="nav-item" href="#references"><span class="nav-num">—</span>References</a>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- ─ 01 ─ -->
+    <section class="section" id="s1">
+      <div class="section-header">
+        <span class="section-num">01</span>
+        <h2>Overview &amp; Architecture</h2>
+      </div>
+      <p>This lab builds a fully functional Active Directory environment with two VMs communicating over a private internal network — mirroring a real enterprise setup. The Domain Controller (DC) sits between the internet and the internal LAN, routing traffic for all client machines.</p>
+
+      <div class="arch-box">
+<span class="arch-internet">[ Internet ]</span>
+      |
+ <span class="arch-label">[ VMware NAT ]</span>
+      |
+ ┌────────────────────────────────────┐
+ │  <span class="arch-dc">Domain Controller (DC)</span>              │
+ │  <span class="arch-label">Windows Server 2022</span>                 │
+ │  <span class="arch-label">├─ NIC 1:</span> <span class="arch-internet">NAT</span>  <span class="arch-label">(internet)</span>          │
+ │  <span class="arch-label">└─ NIC 2:</span> <span class="arch-dc">Host-Only</span> <span class="arch-label">(LAN)</span>      │
+ │  <span class="arch-label">IP: </span><span class="arch-dc">172.16.0.1</span>                      │
+ │  <span class="arch-label">Roles: AD DS · DNS · DHCP · NAT</span>    │
+ └────────────────────────────────────┘
+      |  <span class="arch-label">(internal host-only network)</span>
+ ┌────────────────────────────────────┐
+ │  <span class="arch-client">CLIENT1</span>                             │
+ │  <span class="arch-label">Windows 10/11 Enterprise</span>            │
+ │  <span class="arch-label">NIC: Host-Only</span>                      │
+ │  <span class="arch-label">IP: </span><span class="arch-client">172.16.0.x</span> <span class="arch-label">(via DHCP)</span>       │
+ └────────────────────────────────────┘</div>
+
+      <div class="build-list">
+        <div class="build-card">
+          <span class="build-icon">🖥️</span>
+          <p><strong>Domain Controller</strong> — Windows Server 2022 with AD DS, DNS, DHCP, and NAT</p>
+        </div>
+        <div class="build-card">
+          <span class="build-icon">💻</span>
+          <p><strong>Client Machine</strong> — Windows 10/11 joined to the domain</p>
+        </div>
+        <div class="build-card">
+          <span class="build-icon">👥</span>
+          <p><strong>1,000+ Users</strong> — Bulk-created via PowerShell script</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─ 02 ─ -->
+    <section class="section" id="s2">
+      <div class="section-header">
+        <span class="section-num">02</span>
+        <h2>Prerequisites &amp; Downloads</h2>
+      </div>
+
+      <h3>System Requirements</h3>
+      <div class="req-grid">
+        <div class="req-card">
+          <div class="req-label">RAM</div>
+          <div class="req-min">Min: 8 GB</div>
+          <div class="req-rec">Rec: 16 GB</div>
+        </div>
+        <div class="req-card">
+          <div class="req-label">Disk Space</div>
+          <div class="req-min">Min: 80 GB free</div>
+          <div class="req-rec">Rec: 120 GB+</div>
+        </div>
+        <div class="req-card">
+          <div class="req-label">CPU Cores</div>
+          <div class="req-min">Min: 4 cores</div>
+          <div class="req-rec">Rec: 6+ cores</div>
+        </div>
+      </div>
+
+      <h3>Required Downloads</h3>
+      <table class="dl-table">
+        <thead>
+          <tr><th>File</th><th>Source</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>VMware Workstation Player</td><td><a href="https://www.vmware.com/products/workstation-player.html" target="_blank">broadcom.com ↗</a></td></tr>
+          <tr><td>Windows Server 2022 ISO</td><td><a href="https://www.microsoft.com/en-us/evalcenter/download-windows-server-2022" target="_blank">Microsoft Eval Center ↗</a></td></tr>
+          <tr><td>Windows 10/11 Enterprise ISO</td><td><a href="https://www.microsoft.com/en-us/evalcenter/download-windows-11-enterprise" target="_blank">Microsoft Eval Center ↗</a></td></tr>
+          <tr><td>PowerShell User Creation Script</td><td><a href="https://github.com/joshmadakor1/AD_PS" target="_blank">github.com/joshmadakor1/AD_PS ↗</a></td></tr>
+        </tbody>
+      </table>
+      <div class="callout warn">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-body"><strong>Start downloads first.</strong> The ISOs are several gigabytes each and will take time depending on your connection speed.</div>
+      </div>
+    </section>
+
+    <!-- ─ 03 ─ -->
+    <section class="section" id="s3">
+      <div class="section-header">
+        <span class="section-num">03</span>
+        <h2>VM 1 — Domain Controller Setup</h2>
+      </div>
+
+      <h3>Create the VM in VMware</h3>
+      <ol class="steps">
+        <li class="step"><div class="step-num">1</div><div class="step-body">Open VMware → click <strong>Create a New Virtual Machine</strong></div></li>
+        <li class="step"><div class="step-num">2</div><div class="step-body">Select <strong>"I will install the operating system later"</strong></div></li>
+        <li class="step"><div class="step-num">3</div><div class="step-body">Guest OS: <strong>Microsoft Windows</strong> → <strong>Windows Server 2022</strong></div></li>
+        <li class="step"><div class="step-num">4</div><div class="step-body">Name the VM: <code>DC</code> (or <code>Domain-Controller</code>)</div></li>
+        <li class="step"><div class="step-num">5</div><div class="step-body">Disk size: <strong>60 GB</strong> → Store as a single file</div></li>
+        <li class="step"><div class="step-num">6</div><div class="step-body">Click <strong>"Customize Hardware"</strong> before finishing — configure settings below</div></li>
+      </ol>
+
+      <div class="callout tip">
+        <span class="callout-icon">💡</span>
+        <div class="callout-body"><strong>Do NOT</strong> use "Installer disc image file" at the VM creation step — it can trigger easy-install mode and cause boot errors. Attach the ISO manually after the VM is created.</div>
+      </div>
+
+      <h3>VMware Hardware Settings — Domain Controller</h3>
+      <table class="settings-table">
+        <thead><tr><th>Setting</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td>Memory</td><td><span class="val-green">2–4 GB</span></td></tr>
+          <tr><td>Processors</td><td><span class="val-accent">1 CPU, 2 Cores</span></td></tr>
+          <tr><td>Network Adapter 1</td><td><span class="val-accent">NAT</span> <span class="val-note">— connects to internet</span></td></tr>
+          <tr><td>Network Adapter 2</td><td><span class="val-green">Host-Only</span> <span class="val-note">— internal LAN (add via "Add...")</span></td></tr>
+          <tr><td>CD/DVD Drive</td><td><span class="val-orange">Browse → Windows Server 2022 ISO</span></td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout tip">
+        <span class="callout-icon">🔄</span>
+        <div class="callout-body"><strong>VMware vs VirtualBox:</strong> VirtualBox uses an "Internal Network" adapter for isolated LAN traffic. In VMware, <strong>Host-Only</strong> achieves the same effect — VMs can talk to each other but not the external network directly.</div>
+      </div>
+
+      <h3>Install Windows Server 2022</h3>
+      <ol class="steps">
+        <li class="step"><div class="step-num">1</div><div class="step-body">Power on the VM</div></li>
+        <li class="step"><div class="step-num">2</div><div class="step-body"><strong>Act fast!</strong> When you see <code>"Press any key to boot from CD/DVD..."</code> — press immediately. You have ~3 seconds.</div></li>
+        <li class="step"><div class="step-num">3</div><div class="step-body">In the setup wizard, select <strong>Windows Server 2022 Standard Evaluation (Desktop Experience)</strong></div></li>
+        <li class="step"><div class="step-num">4</div><div class="step-body">Choose <strong>Custom Install</strong> → select the unallocated disk → Next</div></li>
+        <li class="step"><div class="step-num">5</div><div class="step-body">Let the install complete, then set a strong <strong>Administrator password</strong></div></li>
+      </ol>
+
+      <div class="callout warn">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-body">You <strong>must</strong> choose <strong>Desktop Experience</strong> — the non-GUI (Core) version has no desktop, icons, or taskbar and is not suitable for this lab.</div>
+      </div>
+
+      <h3>Install VMware Tools</h3>
+      <p>VMware Tools enables proper display scaling, clipboard sharing, and drag-and-drop between host and VM.</p>
+      <ol class="steps">
+        <li class="step"><div class="step-num">1</div><div class="step-body">Log into the VM as Administrator</div></li>
+        <li class="step"><div class="step-num">2</div><div class="step-body">VMware menu bar → <strong>VM</strong> → <strong>Install VMware Tools...</strong></div></li>
+        <li class="step"><div class="step-num">3</div><div class="step-body">Inside the VM, open File Explorer → D: drive → run <code>setup64.exe</code></div></li>
+        <li class="step"><div class="step-num">4</div><div class="step-body">Follow the wizard (choose <strong>Typical</strong>) → <strong>Restart</strong> the VM</div></li>
+      </ol>
+    </section>
+
+    <!-- ─ 04 ─ -->
+    <section class="section" id="s4">
+      <div class="section-header">
+        <span class="section-num">04</span>
+        <h2>Configure Network Adapters</h2>
+      </div>
+      <p>The DC has two NICs. We need to identify, rename, and assign a static IP to the internal one.</p>
+
+      <h3>Identify Each Adapter</h3>
+      <ol class="steps">
+        <li class="step"><div class="step-num">1</div><div class="step-body">Open <strong>Network &amp; Internet Settings</strong> → <strong>Change adapter options</strong></div></li>
+        <li class="step"><div class="step-num">2</div><div class="step-body">Double-click each adapter → <strong>Details</strong> → look at the IP address</div></li>
+        <li class="step"><div class="step-num">3</div><div class="step-body">IP starting with <code>169.254.x.x</code> → this is <strong>INTERNAL</strong> (Host-Only, no DHCP yet)<br>IP starting with <code>192.168.x.x</code> → this is <strong>INTERNET</strong> (NAT)</div></li>
+        <li class="step"><div class="step-num">4</div><div class="step-body">Rename them: <code>Ethernet0</code> → <code>INTERNET</code> &nbsp;|&nbsp; <code>Ethernet1</code> → <code>INTERNAL</code></div></li>
+      </ol>
+
+      <h3>Assign Static IP to INTERNAL Adapter</h3>
+      <ol class="steps">
+        <li class="step"><div class="step-num">1</div><div class="step-body">Double-click <strong>INTERNAL</strong> → <strong>Properties</strong></div></li>
+        <li class="step"><div class="step-num">2</div><div class="step-body">Select <strong>Internet Protocol Version 4 (TCP/IPv4)</strong> → <strong>Properties</strong></div></li>
+        <li class="step"><div class="step-num">3</div><div class="step-body">Enter the values shown below → click <strong>OK</strong></div></li>
+      </ol>
+
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">IP Config — INTERNAL Adapter</span></div>
+        <pre><span class="val">IP Address:      </span><span class="cmd">172.16.0.1</span>
+<span class="val">Subnet Mask:     </span><span class="cmd">255.255.255.0</span>
+<span class="val">Default Gateway: </span><span class="comment">(leave blank — NAT adapter handles routing)</span>
+
+<span class="val">Preferred DNS:   </span><span class="cmd">127.0.0.1</span>   <span class="comment">← DC uses itself as DNS server</span>
+<span class="val">Alternate DNS:   </span><span class="cmd">8.8.8.8</span></pre>
+      </div>
+
+      <div class="callout tip">
+        <span class="callout-icon">💡</span>
+        <div class="callout-body">Leave the <strong>INTERNET</strong> adapter alone — it gets its IP automatically from VMware's NAT DHCP service.</div>
+      </div>
+    </section>
+
+    <!-- ─ 05 ─ -->
+    <section class="section" id="s5">
+      <div class="section-header">
+        <span class="section-num">05</span>
+        <h2>Install Active Directory Domain Services</h2>
+      </div>
+
+      <h3>Add the AD DS Role</h3>
+      <ol class="steps">
+        <li class="step"><div class="step-num">1</div><div class="step-body">Open <strong>Server Manager</strong> → <strong>Add Roles and Features</strong></div></li>
+        <li class="step"><div class="step-num">2</div><div class="step-body">Installation type: <strong>Role-based or feature-based installation</strong></div></li>
+        <li class="step"><div class="step-num">3</div><div class="step-body">Server selection: choose your DC (pre-selected)</div></li>
+        <li class="step"><div class="step-num">4</div><div class="step-body">Check <strong>Active Directory Domain Services</strong> → <strong>Add Features</strong></div></li>
+        <li class="step"><div class="step-num">5</div><div class="step-body">Click Next through remaining pages → <strong>Install</strong> → <strong>Close</strong></div></li>
+      </ol>
+
+      <h3>Promote to Domain Controller</h3>
+      <p>After installation, a notification flag (⚑) appears in Server Manager:</p>
+      <ol class="steps">
+        <li class="step"><div class="step-num">1</div><div class="step-body">Click the flag → <strong>"Promote this server to a domain controller"</strong></div></li>
+        <li class="step"><div class="step-num">2</div><div class="step-body">Deployment: <strong>Add a new forest</strong></div></li>
+        <li class="step"><div class="step-num">3</div><div class="step-body">Root domain name: <code>mydomain.com</code> (or any name you prefer)</div></li>
+        <li class="step"><div class="step-num">4</div><div class="step-body">Set a <strong>DSRM password</strong> (recovery mode — note it down)</div></li>
+        <li class="step"><div class="step-num">5</div><div class="step-body">Leave all defaults → click through → <strong>Install</strong></div></li>
+        <li class="step"><div class="step-num">6</div><div class="step-body">Server auto-restarts. Log back in as <code>MYDOMAIN\Administrator</code></div></li>
+      </ol>
+    </section>
+
+    <!-- ─ 06 ─ -->
+    <section class="section" id="s6">
+      <div class="section-header">
+        <span class="section-num">06</span>
+        <h2>Create a Domain Admin Account</h2>
+      </div>
+      <p>Using the built-in Administrator account directly is poor practice. Create a dedicated admin account instead.</p>
+
+      <h3>Create an Organizational Unit (OU)</h3>
+      <p>OUs are AD containers — like folders — that Group Policies can be applied to. We'll create one for admin accounts.</p>
+      <ol class="steps">
+        <li class="step"><div class="step-num">1</div><div class="step-body">Start → <strong>Windows Administrative Tools</strong> → <strong>Active Directory Users and Computers</strong> <em>(pin this to the taskbar)</em></div></li>
+        <li class="step"><div class="step-num">2</div><div class="step-body">Right-click your domain (<code>mydomain.com</code>) → <strong>New</strong> → <strong>Organizational Unit</strong></div></li>
+        <li class="step"><div class="step-num">3</div><div class="step-body">Name it <code>_ADMINS</code> → OK</div></li>
+      </ol>
+
+      <h3>Create the Admin User</h3>
+      <ol class="steps">
+        <li class="step"><div class="step-num">1</div><div class="step-body">Right-click <code>_ADMINS</code> → <strong>New</strong> → <strong>User</strong></div></li>
+        <li class="step"><div class="step-num">2</div><div class="step-body">User logon name: <code>a-yourname</code> <em>(convention: <code>a-</code> prefix for admins)</em></div></li>
+        <li class="step"><div class="step-num">3</div><div class="step-body">Set a password → check <strong>"Password never expires"</strong> (lab only) → Finish</div></li>
+      </ol>
+
+      <h3>Grant Domain Admin Privileges</h3>
+      <ol class="steps">
+        <li class="step"><div class="step-num">1</div><div class="step-body">Right-click the new user → <strong>Properties</strong></div></li>
+        <li class="step"><div class="step-num">2</div><div class="step-body"><strong>Member Of</strong> tab → <strong>Add...</strong></div></li>
+        <li class="step"><div class="step-num">3</div><div class="step-body">Type <code>Domain Admins</code> → <strong>Check Names</strong> → <strong>OK</strong> → <strong>Apply</strong></div></li>
+        <li class="step"><div class="step-num">4</div><div class="step-body">Sign out → click <strong>Other user</strong> → log in as <code>a-yourname</code></div></li>
+      </ol>
+    </section>
+
+    <!-- ─ 07 ─ -->
+    <section class="section" id="s7">
+      <div class="section-header">
+        <span class="section-num">07</span>
+        <h2>Install RAS / NAT</h2>
+      </div>
+      <p>Remote Access Service (RAS) with NAT allows CLIENT1 — which only has a Host-Only adapter — to reach the internet <em>through</em> the Domain Controller.</p>
+
+      <h3>Add the Remote Access Role</h3>
+      <ol class="steps">
+        <li class="step"><div class="step-num">1</div><div class="step-body">Server Manager → <strong>Add Roles and Features</strong></div></li>
+        <li class="step"><div class="step-num">2</div><div class="step-body">Server Roles: check <strong>Remote Access</strong> → Next</div></li>
+        <li class="step"><div class="step-num">3</div><div class="step-body">Role Services: check <strong>Routing</strong> → <strong>Add Features</strong> → Next → <strong>Install</strong></div></li>
+      </ol>
+
+      <h3>Enable and Configure NAT</h3>
+      <ol class="steps">
+        <li class="step"><div class="step-num">1</div><div class="step-body">Server Manager → <strong>Tools</strong> → <strong>Routing and Remote Access</strong></div></li>
+        <li class="step"><div class="step-num">2</div><div class="step-body">Right-click your server → <strong>Configure and Enable Routing and Remote Access</strong></div></li>
+        <li class="step"><div class="step-num">3</div><div class="step-body">Configuration: select <strong>Network Address Translation (NAT)</strong></div></li>
+        <li class="step"><div class="step-num">4</div><div class="step-body">Network Interface: select the <strong>INTERNET</strong> adapter → <strong>Finish</strong></div></li>
+      </ol>
+      <div class="callout success">
+        <span class="callout-icon">✅</span>
+        <div class="callout-body">The server icon should now show a <strong>green upward arrow</strong>. NAT is active and routing is enabled.</div>
+      </div>
+    </section>
+
+    <!-- ─ 08 ─ -->
+    <section class="section" id="s8">
+      <div class="section-header">
+        <span class="section-num">08</span>
+        <h2>Configure DHCP Server</h2>
+      </div>
+      <p>The DHCP server will automatically assign IP addresses (<code>172.16.0.100–200</code>) to clients on the internal network.</p>
+
+      <h3>Add the DHCP Role</h3>
+      <ol class="steps">
+        <li class="step"><div class="step-num">1</div><div class="step-body">Server Manager → <strong>Add Roles and Features</strong></div></li>
+        <li class="step"><div class="step-num">2</div><div class="step-body">Check <strong>DHCP Server</strong> → <strong>Add Features</strong> → <strong>Install</strong></div></li>
+      </ol>
+
+      <h3>Configure the DHCP Scope</h3>
+      <ol class="steps">
+        <li class="step"><div class="step-num">1</div><div class="step-body">Server Manager → <strong>Tools</strong> → <strong>DHCP</strong></div></li>
+        <li class="step"><div class="step-num">2</div><div class="step-body">Expand your server → right-click <strong>IPv4</strong> → <strong>New Scope...</strong></div></li>
+      </ol>
+
+      <table class="settings-table">
+        <thead><tr><th>Field</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td>Scope Name</td><td><span class="val-accent">172.16.0.100-200</span></td></tr>
+          <tr><td>Start IP</td><td><span class="val-green">172.16.0.100</span></td></tr>
+          <tr><td>End IP</td><td><span class="val-green">172.16.0.200</span></td></tr>
+          <tr><td>Subnet Mask</td><td><span class="val-accent">255.255.255.0</span> <span class="val-note">(Length: 24)</span></td></tr>
+          <tr><td>Default Gateway</td><td><span class="val-orange">172.16.0.1</span> <span class="val-note">— the DC's internal IP</span></td></tr>
+          <tr><td>DNS Server</td><td><span class="val-note">Leave default (configured by AD)</span></td></tr>
+        </tbody>
+      </table>
+
+      <ol class="steps" style="margin-top:14px;">
+        <li class="step"><div class="step-num">3</div><div class="step-body">"Configure DHCP options now?" → <strong>Yes</strong> → set Default Gateway to <code>172.16.0.1</code></div></li>
+        <li class="step"><div class="step-num">4</div><div class="step-body">Skip WINS → <strong>"Yes, activate this scope now"</strong> → <strong>Finish</strong></div></li>
+        <li class="step"><div class="step-num">5</div><div class="step-body">In DHCP console → right-click server name → <strong>Authorize</strong> → right-click → <strong>Refresh</strong></div></li>
+      </ol>
+      <div class="callout success">
+        <span class="callout-icon">✅</span>
+        <div class="callout-body">Both <strong>IPv4</strong> and <strong>IPv6</strong> should now show a <strong>green checkmark</strong>. DHCP is active.</div>
+      </div>
+    </section>
+
+    <!-- ─ 09 ─ -->
+    <section class="section" id="s9">
+      <div class="section-header">
+        <span class="section-num">09</span>
+        <h2>Bulk Create Users with PowerShell</h2>
+      </div>
+      <p>We'll auto-generate ~1,000 user accounts using Josh Madakor's PowerShell script — simulating a real enterprise directory.</p>
+
+      <h3>Prepare the Environment</h3>
+      <ol class="steps">
+        <li class="step"><div class="step-num">1</div><div class="step-body">Server Manager → <strong>Configure this local server</strong></div></li>
+        <li class="step"><div class="step-num">2</div><div class="step-body">Find <strong>IE Enhanced Security Configuration</strong> → turn <strong>Off</strong> for both Admins and Users</div></li>
+      </ol>
+
+      <h3>Download &amp; Customize the Script</h3>
+      <ol class="steps">
+        <li class="step"><div class="step-num">1</div><div class="step-body">Browse to: <a href="https://github.com/joshmadakor1/AD_PS" target="_blank" style="color:var(--accent);">github.com/joshmadakor1/AD_PS ↗</a></div></li>
+        <li class="step"><div class="step-num">2</div><div class="step-body">Click <strong>Code</strong> → <strong>Download ZIP</strong> → extract the folder</div></li>
+        <li class="step"><div class="step-num">3</div><div class="step-body">Open <code>names.txt</code> → <strong>add your own name</strong> at the top → save</div></li>
+      </ol>
+      <div class="callout tip">
+        <span class="callout-icon">📝</span>
+        <div class="callout-body">Adding your name ensures you have a personal account to log into CLIENT1 with later.</div>
+      </div>
+
+      <h3>Run the Script</h3>
+      <ol class="steps">
+        <li class="step"><div class="step-num">1</div><div class="step-body">Open <strong>Windows PowerShell ISE</strong> as <strong>Administrator</strong></div></li>
+        <li class="step"><div class="step-num">2</div><div class="step-body">Open <code>1_CREATE_USERS.ps1</code> from the extracted folder</div></li>
+        <li class="step"><div class="step-num">3</div><div class="step-body">In the terminal pane, run:</div></li>
+      </ol>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">PowerShell</span>
+          <button class="copy-btn" onclick="copyCode(this, 'Set-ExecutionPolicy Unrestricted')">Copy</button>
+        </div>
+        <pre><span class="kw">Set-ExecutionPolicy</span> <span class="str">Unrestricted</span>
+<span class="comment"># Select "Yes to All" when prompted</span></pre>
+      </div>
+
+      <ol class="steps">
+        <li class="step"><div class="step-num">4</div><div class="step-body">Navigate to the script directory:</div></li>
+      </ol>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">PowerShell</span>
+          <button class="copy-btn" onclick="copyCode(this, 'cd C:\\Users\\a-yourname\\Downloads\\AD_PS-master\\AD_PS-master')">Copy</button>
+        </div>
+        <pre><span class="cmd">cd</span> <span class="str">C:\Users\a-yourname\Downloads\AD_PS-master\AD_PS-master</span></pre>
+      </div>
+
+      <ol class="steps">
+        <li class="step"><div class="step-num">5</div><div class="step-body">Press <strong>F5</strong> (or click the green Run button) — watch users being created in real time</div></li>
+        <li class="step"><div class="step-num">6</div><div class="step-body">Verify: open <strong>Active Directory Users and Computers</strong> → check the <code>_USERS</code> OU</div></li>
+      </ol>
+
+      <div class="callout warn">
+        <span class="callout-icon">🔑</span>
+        <div class="callout-body">All auto-created accounts use the default password: <code>Password1</code></div>
+      </div>
+    </section>
+
+    <!-- ─ 10 ─ -->
+    <section class="section" id="s10">
+      <div class="section-header">
+        <span class="section-num">10</span>
+        <h2>VM 2 — Windows Client Setup</h2>
+      </div>
+
+      <h3>Create the Client VM in VMware</h3>
+      <ol class="steps">
+        <li class="step"><div class="step-num">1</div><div class="step-body">VMware → <strong>Create a New Virtual Machine</strong> → <strong>"I will install the operating system later"</strong></div></li>
+        <li class="step"><div class="step-num">2</div><div class="step-body">Guest OS: <strong>Microsoft Windows</strong> → <strong>Windows 10 / Windows 11</strong></div></li>
+        <li class="step"><div class="step-num">3</div><div class="step-body">Name the VM: <code>CLIENT1</code> — Disk: <strong>60 GB</strong></div></li>
+        <li class="step"><div class="step-num">4</div><div class="step-body">Click <strong>Customize Hardware</strong> — configure settings below</div></li>
+      </ol>
+
+      <table class="settings-table">
+        <thead><tr><th>Setting</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td>Memory</td><td><span class="val-green">4 GB+</span> <span class="val-note">(Windows 11 is demanding — more is better)</span></td></tr>
+          <tr><td>Processors</td><td><span class="val-accent">1 CPU, 2 Cores</span></td></tr>
+          <tr><td>Network Adapter</td><td><span class="val-green">Host-Only</span> <span class="val-note">— traffic routes through DC</span></td></tr>
+          <tr><td>CD/DVD Drive</td><td><span class="val-orange">Browse → Windows 10/11 ISO</span></td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout warn">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-body">CLIENT1 gets <strong>only</strong> a Host-Only adapter — no NAT. Internet access flows through the DC via NAT. This is the correct architecture.</div>
+      </div>
+
+      <h3>Install Windows 10/11</h3>
+      <ol class="steps">
+        <li class="step"><div class="step-num">1</div><div class="step-body">Power on → press a key immediately at the boot prompt</div></li>
+        <li class="step"><div class="step-num">2</div><div class="step-body">When prompted to sign in with Microsoft: click <strong>"Sign-in options"</strong> → <strong>"Domain join instead"</strong></div></li>
+        <li class="step"><div class="step-num">3</div><div class="step-body">Create a temporary local account (e.g., <code>User</code>) → complete Windows setup</div></li>
+      </ol>
+
+      <h3>Verify DHCP &amp; Internet</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">CMD</span>
+          <button class="copy-btn" onclick="copyCode(this, 'ipconfig\nping google.com')">Copy</button>
+        </div>
+        <pre><span class="comment"># Verify you received a DHCP address (should be 172.16.0.100–200)</span>
+<span class="cmd">ipconfig</span>
+
+<span class="comment"># Test internet connectivity through the DC</span>
+<span class="cmd">ping google.com</span></pre>
+      </div>
+      <div class="callout success">
+        <span class="callout-icon">✅</span>
+        <div class="callout-body">Replies from ping mean your NAT routing through the DC is working correctly!</div>
+      </div>
+    </section>
+
+    <!-- ─ 11 ─ -->
+    <section class="section" id="s11">
+      <div class="section-header">
+        <span class="section-num">11</span>
+        <h2>Join Client to the Domain</h2>
+      </div>
+      <ol class="steps">
+        <li class="step"><div class="step-num">1</div><div class="step-body">Right-click <strong>Start</strong> → <strong>System</strong></div></li>
+        <li class="step"><div class="step-num">2</div><div class="step-body">Click <strong>"Domain or workgroup"</strong> (or <strong>"Rename this PC (advanced)"</strong>)</div></li>
+        <li class="step"><div class="step-num">3</div><div class="step-body">Computer Name tab → click <strong>Change</strong></div></li>
+        <li class="step"><div class="step-num">4</div><div class="step-body">Computer name: <code>CLIENT1</code> — Member of: <strong>Domain</strong> → type <code>mydomain.com</code></div></li>
+        <li class="step"><div class="step-num">5</div><div class="step-body">When prompted, enter credentials: <code>a-yourname</code> / your admin password</div></li>
+        <li class="step"><div class="step-num">6</div><div class="step-body"><strong>"Welcome to the mydomain.com domain"</strong> → OK → <strong>Restart</strong></div></li>
+      </ol>
+
+      <h3>Log In as a Domain User</h3>
+      <ol class="steps">
+        <li class="step"><div class="step-num">1</div><div class="step-body">On the login screen → click <strong>Other user</strong></div></li>
+        <li class="step"><div class="step-num">2</div><div class="step-body">Username: any account from the <code>_USERS</code> OU (e.g., <code>jsmith</code>) — Password: <code>Password1</code></div></li>
+      </ol>
+      <div class="callout success">
+        <span class="callout-icon">🎉</span>
+        <div class="callout-body">You're now logged into a domain-joined machine using an Active Directory account — the lab is complete!</div>
+      </div>
+    </section>
+
+    <!-- ─ 12 ─ -->
+    <section class="section" id="s12">
+      <div class="section-header">
+        <span class="section-num">12</span>
+        <h2>Post-Lab Admin Tasks</h2>
+      </div>
+      <p>Practice these real-world Active Directory tasks from the Domain Controller.</p>
+
+      <h3>Reset a User's Password</h3>
+      <ol class="steps">
+        <li class="step"><div class="step-num">1</div><div class="step-body">Open <strong>Active Directory Users and Computers</strong></div></li>
+        <li class="step"><div class="step-num">2</div><div class="step-body">Find a user in the <code>_USERS</code> OU → right-click → <strong>Reset Password</strong></div></li>
+        <li class="step"><div class="step-num">3</div><div class="step-body">Enter a new password → <strong>OK</strong></div></li>
+      </ol>
+
+      <h3>Unlock a Locked Account</h3>
+      <ol class="steps">
+        <li class="step"><div class="step-num">1</div><div class="step-body">Right-click the user → <strong>Properties</strong></div></li>
+        <li class="step"><div class="step-num">2</div><div class="step-body"><strong>Account</strong> tab → check <strong>"Unlock account"</strong> → <strong>Apply</strong></div></li>
+      </ol>
+
+      <h3>Create Organizational Units</h3>
+      <ol class="steps">
+        <li class="step"><div class="step-num">1</div><div class="step-body">Right-click your domain → <strong>New</strong> → <strong>Organizational Unit</strong></div></li>
+        <li class="step"><div class="step-num">2</div><div class="step-body">Create OUs for: <code>HR</code>, <code>IT</code>, <code>Sales</code></div></li>
+        <li class="step"><div class="step-num">3</div><div class="step-body">Move users into OUs by right-clicking → <strong>Move</strong></div></li>
+      </ol>
+
+      <h3>Verify Domain Join from the DC</h3>
+      <p>Open <strong>DHCP</strong> console → expand <strong>IPv4</strong> → <strong>Address Leases</strong> — you should see <code>CLIENT1</code> listed with its assigned IP.</p>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- SUMMARY -->
+    <section class="section" id="summary">
+      <div class="section-header">
+        <span class="section-num">—</span>
+        <h2>Lab Summary</h2>
+      </div>
+      <div class="summary-grid">
+        <div class="summary-item"><span class="summary-key">Hypervisor</span><span class="summary-val">VMware Workstation Pro / Player</span></div>
+        <div class="summary-item"><span class="summary-key">Domain Controller OS</span><span class="summary-val">Windows Server 2022 (Desktop Experience)</span></div>
+        <div class="summary-item"><span class="summary-key">Client OS</span><span class="summary-val">Windows 10/11 Enterprise</span></div>
+        <div class="summary-item"><span class="summary-key">Domain Name</span><span class="summary-val">mydomain.com</span></div>
+        <div class="summary-item"><span class="summary-key">DC Internal IP</span><span class="summary-val">172.16.0.1</span></div>
+        <div class="summary-item"><span class="summary-key">DHCP Range</span><span class="summary-val">172.16.0.100 – 172.16.0.200</span></div>
+        <div class="summary-item"><span class="summary-key">AD Roles Installed</span><span class="summary-val">AD DS · DNS · DHCP · RAS/NAT</span></div>
+        <div class="summary-item"><span class="summary-key">Users Created</span><span class="summary-val">~1,000 (via PowerShell)</span></div>
+      </div>
+    </section>
+
+    <!-- TROUBLESHOOTING -->
+    <section class="section" id="troubleshooting">
+      <div class="section-header">
+        <span class="section-num">—</span>
+        <h2>Troubleshooting</h2>
+      </div>
+
+      <div class="trouble-item">
+        <div class="trouble-q" onclick="toggleTrouble(this)">VM won't boot from ISO</div>
+        <div class="trouble-a">Go to VM Settings → CD/DVD Drive → confirm the ISO path is set and <strong>"Connect at power on"</strong> is checked. Also verify the ISO file isn't corrupted.</div>
+      </div>
+      <div class="trouble-item">
+        <div class="trouble-q" onclick="toggleTrouble(this)">Missed the "press any key" prompt</div>
+        <div class="trouble-a">In VMware: VM Settings → Options → Boot → set <strong>Power-on boot delay to 5000 ms</strong>. This gives you 5 seconds to press a key at the boot screen.</div>
+      </div>
+      <div class="trouble-item">
+        <div class="trouble-q" onclick="toggleTrouble(this)">CLIENT1 has no IP address</div>
+        <div class="trouble-a">Ensure the DHCP scope is authorized (green checkmark in DHCP console). Verify CLIENT1's NIC is set to Host-Only and that it matches the DC's Host-Only network segment.</div>
+      </div>
+      <div class="trouble-item">
+        <div class="trouble-q" onclick="toggleTrouble(this)">Can't ping google.com from CLIENT1</div>
+        <div class="trouble-a">Verify NAT is enabled on the DC (green arrow in Routing and Remote Access). Check the INTERNAL adapter on the DC is <code>172.16.0.1</code>. Confirm the DHCP scope default gateway is set to <code>172.16.0.1</code>.</div>
+      </div>
+      <div class="trouble-item">
+        <div class="trouble-q" onclick="toggleTrouble(this)">Domain join fails</div>
+        <div class="trouble-a">On CLIENT1, run <code>ipconfig /all</code> — DNS Server should show <code>172.16.0.1</code>. If not, set it manually in adapter properties. Also confirm the DC is running and the domain name is typed correctly.</div>
+      </div>
+      <div class="trouble-item">
+        <div class="trouble-q" onclick="toggleTrouble(this)">PowerShell script won't run</div>
+        <div class="trouble-a">Open PowerShell ISE as <strong>Administrator</strong>. Run <code>Set-ExecutionPolicy Unrestricted</code> and choose <strong>Yes to All</strong>. Then navigate to the correct directory before running the script.</div>
+      </div>
+    </section>
+
+    <!-- REFERENCES -->
+    <section class="section" id="references">
+      <div class="section-header">
+        <span class="section-num">—</span>
+        <h2>References</h2>
+      </div>
+      <div class="ref-grid">
+        <a class="ref-card" href="https://www.youtube.com/watch?v=MHsI8hJmggI" target="_blank">
+          <span class="ref-icon">🎥</span>
+          <span class="ref-title">Josh Madakor — AD Home Lab</span>
+          <span class="ref-url">youtube.com ↗</span>
+        </a>
+        <a class="ref-card" href="https://github.com/joshmadakor1/AD_PS" target="_blank">
+          <span class="ref-icon">📁</span>
+          <span class="ref-title">PowerShell User Script</span>
+          <span class="ref-url">github.com/joshmadakor1 ↗</span>
+        </a>
+        <a class="ref-card" href="https://www.vmware.com/products/workstation-player.html" target="_blank">
+          <span class="ref-icon">🖥️</span>
+          <span class="ref-title">VMware Workstation Player</span>
+          <span class="ref-url">vmware.com ↗</span>
+        </a>
+        <a class="ref-card" href="https://www.microsoft.com/en-us/evalcenter/download-windows-server-2022" target="_blank">
+          <span class="ref-icon">🪟</span>
+          <span class="ref-title">Windows Server 2022 ISO</span>
+          <span class="ref-url">microsoft.com ↗</span>
+        </a>
+        <a class="ref-card" href="https://www.microsoft.com/en-us/evalcenter/download-windows-11-enterprise" target="_blank">
+          <span class="ref-icon">🪟</span>
+          <span class="ref-title">Windows 11 Enterprise ISO</span>
+          <span class="ref-url">microsoft.com ↗</span>
+        </a>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <span>Active Directory Home Lab &nbsp;·&nbsp; VMware Workstation &nbsp;·&nbsp; Cybersecurity Portfolio</span>
+  <span>Based on <a href="https://www.youtube.com/watch?v=MHsI8hJmggI" target="_blank">Josh Madakor's tutorial</a></span>
+</footer>
+
+<script>
+  // ── Copy button ──
+  function copyCode(btn, text) {
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  // ── Troubleshooting accordion ──
+  function toggleTrouble(el) {
+    el.parentElement.classList.toggle('open');
+  }
+
+  // ── Scroll observer — section reveal ──
+  const sections = document.querySelectorAll('.section');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.08 });
+  sections.forEach(s => observer.observe(s));
+
+  // ── Progress bar + active nav ──
+  const navItems = document.querySelectorAll('.nav-item');
+  const progressFill = document.getElementById('progress');
+
+  window.addEventListener('scroll', () => {
+    const scrolled = window.scrollY;
+    const total = document.body.scrollHeight - window.innerHeight;
+    progressFill.style.width = Math.min(100, (scrolled / total) * 100) + '%';
+
+    let currentId = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 120) currentId = s.id;
+    });
+    navItems.forEach(n => {
+      n.classList.toggle('active', n.getAttribute('href') === '#' + currentId);
+    });
+  });
+</script>
+</body>
+</html>
