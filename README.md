@@ -1,7 +1,7 @@
 # 🖥️ Active Directory Home Lab — VMware Workstation
 
-> **[Set up Active Directory with 1000 users](https://jacobvasquez92.github.io/active-directory-setup-1000-users-lab/#s2) - Tutorial web page**  
->  **[Active Directory Honeypot Lab with IDS and SIEM Monitoring](https://github.com/jacobvasquez92/active-directory-honeypot-lab/blob/main/README.md) - Execute this lab in conjunction with the Active Directory with 1000 Users Lab.**
+>  **[Tutorial web page ](https://jacobvasquez92.github.io/active-directory-setup-1000-users-lab/#s2)**  
+>  **[Active Directory Honeypot Lab with IDS and SIEM Monitoring](https://github.com/jacobvasquez92/active-directory-honeypot-lab/blob/main/README.md) - Execute this lab in conjunction with the Active Directory Home Lab.**
 
 
 ---
